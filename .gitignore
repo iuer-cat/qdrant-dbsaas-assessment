@@ -10,3 +10,5 @@ venv
 .python-version
 .terraform
 *.hcl
+docs_gen
+docs_gen/*
