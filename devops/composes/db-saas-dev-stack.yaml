@@ -1,0 +1,40 @@
+version: '3.8'
+services:
+  orion:
+    image: localhost/qdrant/db-saas
+    container_name: qdrant-db-saas-orion
+    command: /opt/qdrant/components/start_service.sh orion
+    build:
+      context: ../../
+      dockerfile: devops/container_files/cf-qdrant-db-saas
+    volumes:
+      - ../../persistence_layer:/opt/qdrant/persistence_layer
+    restart: always
+    user: ${USER_ID}:${GROUP_ID}
+    network_mode: "host"
+
+  nebula:
+    image: localhost/qdrant/db-saas
+    container_name: qdrant-db-saas-nebula
+    command: /opt/qdrant/components/start_service.sh nebula
+    build:
+      context: ../../
+      dockerfile: devops/container_files/cf-qdrant-db-saas
+    volumes:
+      - ../../persistence_layer:/opt/qdrant/persistence_layer
+    restart: always
+    network_mode: "host"
+    user: ${USER_ID}:${GROUP_ID}
+
+  gatekeeper:
+    image: localhost/qdrant/db-saas
+    container_name: qdrant-db-saas-gatekeeper
+    command: /opt/qdrant/components/start_service.sh gatekeeper
+    build:
+      context: ../../
+      dockerfile: devops/container_files/cf-qdrant-db-saas
+    volumes:
+      - ../../persistence_layer:/opt/qdrant/persistence_layer
+    restart: always
+    user: ${USER_ID}:${GROUP_ID}
+    network_mode: "host"

@@ -1,0 +1,260 @@
+@startuml
+
+|Orion|
+start
+partition FastAPI {
+:Request
+""/{account_id}/clusters"";
+}
+:ResourceClaim; <<input>>
+note left
+    Model Containing the total
+    amount of resources
+    requested for the
+    provisioning.
+  end note
+
+partition DbClusterProvisionerService {
+:allocate(); <<task>>
+note left
+    Reserve Compute Resources
+    (disk, cpu, memory) for
+    Qdrant DB Cluster
+    provisioning.
+end note
+}
+
+:ResourceAllocation; <<output>>
+note left
+    Model Containing the region
+    and the K8s cluster elected
+    for the provisioning.
+end note
+
+partition DBClusterEndpointService {
+:register(); <<procedure>>
+note left
+    Generate the Endpoint
+    for Qdrant DB accessing.
+end note
+}
+
+partition DbClusterProvisionerService {
+:claim_provision(); <<task>>
+note left
+    Generate and Dispatch
+    the Command ProvisionDBCluster
+end note
+}
+|#gold|e| Command Bus
+fork
+
+:dispatch(); <<procedure>>
+detach
+:retrieve(); <<procedure>>
+endfork
+
+|Nebula|
+
+partition ProvisionDBClusterHandler {
+:handle(); <<task>>
+note left
+    Process Commands
+    One-by-One
+end note
+}
+
+partition DBClusterApiKeyService {
+:generate(); <<task>>
+note left
+    Generate a 32 Characters Qdrant
+    api-key compatible.
+end note
+}
+
+:DBClusterSpecs; <<input>>
+note left
+    Model Containing the total
+    amount of resources
+    requested for the
+    provisioning.
+end note
+
+partition HelmInfrastructureClient {
+:provision(); <<task>>
+note left
+    Based on Cluster Specs
+    Generate a dynamic
+    values.yaml and install
+    the official Qdrant
+    Chart
+end note
+}
+
+partition K8sNetworkingDiscoveryService {
+:get_service_cluster_ip(); <<task>>
+note left
+    Discover the K8s Service
+    used for the generated
+    Qdrant Stateful Set
+    just deployed.
+end note
+}
+
+|#lightgreen|a| Persistence
+fork
+
+:save DBCluster; <<save>>
+note left
+    Persist the model
+    DBCluster, that contains
+    deployment details, the
+    endpoint and the api-key
+    for a provisioned Qdrant
+    Cluster.
+end note
+endfork
+stop
+
+@enduml
+
+
+
+
+
+
+
+
+
+@startuml
+|Orion|
+start
+partition FastAPI {
+:Request
+""/{account_id}/clusters"";
+}
+:ResourceClaim; <<input>>
+note left
+    Model Containing the total
+    amount of resources
+    requested for the
+    provisioning.
+  end note
+
+partition DbClusterProvisionerService {
+:allocate(); <<task>>
+note left
+    Reserve Compute Resources
+    (disk, cpu, memory) for
+    Qdrant DB Cluster
+    provisioning.
+end note
+}
+
+:ResourceAllocation; <<output>>
+note left
+    Model Containing the region
+    and the K8s cluster elected
+    for the provisioning.
+end note
+
+partition DBClusterEndpointService {
+:register(); <<procedure>>
+note left
+    Generate the Endpoint
+    for Qdrant DB accessing.
+end note
+}
+
+partition DbClusterProvisionerService {
+:claim_provision(); <<task>>
+note left
+    Generate and Dispatch
+    the Command ProvisionDBCluster
+end note
+}
+|#gold|e| Command Bus
+fork
+
+:dispatch(); <<procedure>>
+detach
+endfork
+@enduml
+
+
+
+
+@startuml
+|#gold|e| Command Bus
+fork
+:retrieve(); <<procedure>>
+endfork
+
+|Nebula|
+partition ProvisionDBClusterHandler {
+:handle(); <<task>>
+note left
+    Process Commands
+    One-by-One
+end note
+}
+
+partition DBClusterApiKeyService {
+:generate(); <<task>>
+note left
+    Generate a 32 Characters Qdrant
+    api-key compatible.
+end note
+}
+
+:DBClusterSpecs; <<input>>
+note left
+    Model Containing the total
+    amount of resources
+    requested for the
+    provisioning.
+end note
+
+partition HelmInfrastructureClient {
+:provision(); <<task>>
+note left
+    Based on Cluster Specs
+    Generate a dynamic
+    values.yaml and install
+    the official Qdrant
+    Chart
+end note
+}
+
+partition K8sNetworkingDiscoveryService {
+:get_service_cluster_ip(); <<task>>
+note left
+    Discover the K8s Service
+    used for the generated
+    Qdrant Stateful Set
+    just deployed.
+end note
+}
+
+|#lightgreen|a| Persistence
+fork
+
+:save DBCluster; <<save>>
+note left
+    Persist the model
+    DBCluster, that contains
+    deployment details, the
+    endpoint and the api-key
+    for a provisioned Qdrant
+    Cluster.
+end note
+endfork
+stop
+@enduml
+
+
+
+
+
+
+

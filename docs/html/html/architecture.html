@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Architecture &mdash; Qdrant DBaaS prototype  documentation</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/sphinx_highlight.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Use Cases" href="use_cases.html" />
+    <link rel="prev" title="Scope" href="scope.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            Qdrant DBaaS prototype
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="scope.html">Scope</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="use_cases.html">Use Cases</a></li>
+<li class="toctree-l1"><a class="reference internal" href="networking.html">Networking</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">Qdrant DBaaS prototype</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Architecture</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/architecture.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="architecture">
+<h1>Architecture<a class="headerlink" href="#architecture" title="Permalink to this heading"></a></h1>
+<p>There are various methodologies for designing architectures like the one
+required for this technical challenge. My proposal has been to structure it
+using building blocks that group, define, and delineate the different
+responsibilities that I have identified as key and fundamental to achieving
+a prototype under the established parameters.</p>
+<p>These blocks, functional independently and with low coupling between them,
+constitute a unified whole in their use case: a <strong>micro-scale cloud DBSaaS</strong>.</p>
+<p>Designing in blocks, segregating responsibilities, and considering how
+workloads will behave in real environments, is fundamental to the approach
+I have adopted. Far from prematurely optimizing, this architecture stands out
+for its easy extensibility and iteration.</p>
+<p>The segregation of responsibilities will hypothetically allow different
+engineering teams to evolve the building blocks or add more without
+compromising or overly complicating the implementation.</p>
+<p>The benefits of a distributed architecture like the one proposed also
+involve certain compromises, such as eventual consistency, duplicate
+management, and more complex deployments. Although these aspects are not
+minor, for this particular case I have considered that the benefits outweigh
+the drawbacks.</p>
+<section id="building-blocks">
+<h2>Building Blocks<a class="headerlink" href="#building-blocks" title="Permalink to this heading"></a></h2>
+<p>It has been deemed necessary to fragment the proposed solution into four
+clearly defined blocks by their scope of responsibility, the possible
+technological stacks that support them, and their deployability and scalability
+in real-world load scenarios.</p>
+<p>Here they are briefly enumerated and described:</p>
+<dl class="simple">
+<dt>1 - <strong>Orion</strong></dt><dd><p>This component is the central API of the project and exposes the endpoints
+that users and stakeholders will use over time. Given its evolutionary
+nature, a versioning system based on URI resources (/v1/<a href="#id1"><span class="problematic" id="id2">*</span></a>) has been designed.</p>
+</dd>
+<dt>2 - <strong>Nebula</strong></dt><dd><p>Responsible for executing background tasks, such as provisioning <em>Qdrant</em>
+clusters. It has higher response times and eventual consistency. This
+component also interacts with Kubernetes infrastructure, provisioned for
+each cloud provider, which might eventually require it to reside in different
+cloud providers or regions.</p>
+</dd>
+<dt>3 - <strong>Draftsman</strong></dt><dd><p>Conceptualized but not Implemented, is operated by DevOps and SRE roles,
+it is linked to IaaC solutions such as Terraform. Its main mission is the
+provisioning of cross-region and cross-provider Kubernetes clusters,
+informing other blocks about new resource pools.</p>
+</dd>
+<dt>4 - <strong>GateKeeper</strong></dt><dd><p>Acts as a Reverse Proxy that exposes the Qdrant DB Clusters, ensuring security
+through api-tokens. Implemented over the Twisted framework, it allows detailing
+how a reverse-proxy works and how requests are modified by adding domain logic
+in the form of code.</p>
+</dd>
+</dl>
+<a class="reference internal image-reference" href="_images/building_blocks.svg"><img alt="Building Blocks and Boundaries" class="align-center" height="982" src="_images/building_blocks.svg" width="1793" /></a>
+<p>The diagram visualizes the previously defined blocks and schematizes their
+relationships and the underlying technical implementations. Operationally,
+each block is an independent component with low coupling, and the use of
+a MonoRepo gives them high cohesion.</p>
+<p>The architecture allows for independent development life cycles and simplifies
+CI/CD processes. Additionally, it reduces accidental complexity and encourages
+the formation of teams around the defined boundaries.</p>
+</section>
+<section id="interactions-between-components">
+<h2>Interactions Between Components<a class="headerlink" href="#interactions-between-components" title="Permalink to this heading"></a></h2>
+<a class="reference internal image-reference" href="_images/component_interactions.svg"><img alt="Component Interactions" class="align-center" height="746" src="_images/component_interactions.svg" width="1326" /></a>
+<p>The diagram shows that there are two main entry points: an API for cluster
+management and API-keys, and the endpoint of the Qdrant DB Cluster itself
+(GateKeeper), which can be replicated multiple times, always close to the DB
+Clusters it serves.</p>
+<p>With this architecture, Qdrant’s endpoints do not need direct exposure to the
+internet. The use of the CommandBus prevents intensive operations such as
+infrastructure provisioning from overloading the API. Deployments of new
+versions of Nebula are downtime-free, as messages accumulate in the broker for
+later processing.</p>
+<p>Thanks to the abstraction of the cloud provider’s infrastructure with
+Kubernetes, no significant specific implementations in Nebula are required to
+add new cloud providers.</p>
+<p>Specific implementation details for a provider can be addressed at the
+Chart or CRD level in the case of the Kubernetes Operator.</p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="scope.html" class="btn btn-neutral float-left" title="Scope" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="use_cases.html" class="btn btn-neutral float-right" title="Use Cases" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright Albert Monfa.</p>
+  </div>
+
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

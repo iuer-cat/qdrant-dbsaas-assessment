@@ -1,0 +1,45 @@
+version: 1
+disable_existing_loggers: False
+formatters:
+  simple:
+    format: '%(asctime)s - %(levelname)s - %(name)s - %(message)s'
+    datefmt: '%Y-%m-%d %H:%M:%S'
+  structlog:
+    format: '%(message)s'
+handlers:
+  GateKeeperHandler:
+    class: logging.StreamHandler
+    level: DEBUG
+    formatter: structlog
+    stream: ext://sys.stdout
+  NebulaHandler:
+    class: logging.StreamHandler
+    level: DEBUG
+    formatter: structlog
+    stream: ext://sys.stdout
+  OrionHandler:
+    class: logging.StreamHandler
+    level: DEBUG
+    formatter: structlog
+    stream: ext://sys.stdout
+  rootConsoleHandler:
+    class: logging.StreamHandler
+    level: INFO
+    formatter: structlog
+    stream: ext://sys.stdout
+loggers:
+  GateKeeper:
+    level: DEBUG
+    handlers: [ GateKeeperHandler ]
+    propagate: no
+  Nebula:
+    level: DEBUG
+    handlers: [ NebulaHandler ]
+    propagate: no
+  Orion:
+    level: DEBUG
+    handlers: [ OrionHandler ]
+    propagate: no
+root:
+  level: ERROR
+  handlers: [rootConsoleHandler]

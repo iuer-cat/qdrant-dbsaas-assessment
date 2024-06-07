@@ -1,0 +1,69 @@
+@startuml
+
+left to right direction
+
+package "Shared Kernel (Nexus)" <<Node>> {
+    package "Common Models" <<Rectangle>> {
+    }
+    package "Command Bus" <<Rectangle>> {
+    }
+    package "Cloud Providers Resource Maps" <<Rectangle>> {
+    }
+}
+
+package "Control Plane API (Orion)" <<Node>> {
+
+    package "FastAPI Endpoints" <<Rectangle>> {
+        package "Async Create Cluster" <<Rectangle>> {
+        }
+
+        package "Create Api Key" <<Rectangle>> {
+        }
+    }
+
+    package "AuthZ" <<Rectangle>> {
+
+        package "Qdrant api-key Secure Generator" <<Rectangle>> {
+        }
+        package "Salt Hashing Api-Keys Generator" <<Rectangle>> {
+        }
+    }
+}
+
+package "Asyncronous Executor (Nebula)" <<Node>> {
+    package "Kubernetes Service Discovery" <<Rectangle>> {
+    }
+
+    package "Commands Consumer" <<Rectangle>> {
+    }
+
+    package "Helm Chart Manager" <<Rectangle>> {
+    }
+}
+
+package "Cloud Infrastructure Provisioner (Draftsman)" <<Node>> {
+    package "IaaC Tools" <<Rectangle>> {
+    }
+    package "Custom Scripts" <<Rectangle>> {
+    }
+    package "Cloud Providers Resource Maps Generator" <<Rectangle>> {
+    }
+}
+
+package "Cluster Gateway (Gatekeeper)" <<Node>> {
+    package "Salt Hashing Api-Keys Enforcing" <<Rectangle>> {
+    }
+    package "Multi-tenant Reverse Proxy" <<Rectangle>> {
+    }
+}
+
+"Control Plane API (Orion)" *-- "Shared Kernel (Nexus)" : Tight coupled
+"Asyncronous Executor (Nebula)" *-- "Shared Kernel (Nexus)" : Tight coupled
+"Cluster Gateway (Gatekeeper)" *-- "Shared Kernel (Nexus)" : Tight coupled
+
+"Salt Hashing Api-Keys Generator" *-- "Qdrant api-key Secure Generator" : Derivated
+"Salt Hashing Api-Keys Generator" --* "Salt Hashing Api-Keys Enforcing" : Verifying
+
+"Cloud Providers Resource Maps" --* "Cloud Providers Resource Maps Generator" : "Source of Truth"
+
+@enduml

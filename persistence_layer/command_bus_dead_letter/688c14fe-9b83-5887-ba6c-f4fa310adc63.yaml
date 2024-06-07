@@ -1,0 +1,22 @@
+account_id: 988ed5bd-b52f-4b03-a528-c774410e036d
+cloud_provider: minikube
+cloud_region: local
+cluster_id: 12a607bb-1751-4a85-83c9-3f1911cef4e7
+cluster_name: cloud-test
+cluster_version: 1.9.4
+created_at: '2024-06-05 21:54:03.953640'
+db_configuration:
+  cluster_endpoint: 7455ba01-fc9a-5cb0-9d7d-956c81dab0ce.local.minikube.localhost
+  cluster_id: 12a607bb-1751-4a85-83c9-3f1911cef4e7
+  created_at: 2024-06-05 19:54:03.953619
+  id: 3f344bab-2c8f-5be7-a62d-d64fcc4c62b4
+  node_configuration:
+    cpu: 100
+    disk: 1
+    memory: 128
+  num_nodes: 3
+id: 688c14fe-9b83-5887-ba6c-f4fa310adc63
+metadata: {}
+name: ProvisionDBCluster
+schema_id: 701
+type: COMMAND

@@ -1,0 +1,65 @@
+FROM docker.io/python:3.11-slim
+
+ARG POETRY_VERSION=1.7.1
+
+ENV PYTHONFAULTHANDLER=1 \
+  PYTHONUNBUFFERED=1 \
+  PYTHONHASHSEED=random \
+  PIP_NO_CACHE_DIR=off \
+  PIP_DISABLE_PIP_VERSION_CHECK=on \
+  PIP_DEFAULT_TIMEOUT=100 \
+  POETRY_VERSION=${POETRY_VERSION}
+ENV PYTHONPATH=/opt/qdrant/components/nexus/src/:/opt/qdrant/components/orion/src/:/opt/qdrant/components/nebula/src/:/opt/qdrant/components/gatekeeper/src/
+
+WORKDIR /opt/qdrant/components/
+
+COPY components/logging.yaml /opt/qdrant/components/logging.yaml
+
+COPY components/nexus/src /opt/qdrant/components/nexus/src
+COPY components/nexus/pyproject.toml  /opt/qdrant/components/nexus/pyproject.toml
+
+COPY components/orion/src/ /opt/qdrant/components/orion/src
+COPY components/orion/pyproject.toml /opt/qdrant/components/orion/pyproject.toml
+
+COPY components/nebula/src/ /opt/qdrant/components/nebula/src
+COPY components/nebula/pyproject.toml /opt/qdrant/components/nebula/pyproject.toml
+
+COPY components/gatekeeper/src/ /opt/qdrant/components/gatekeeper/src
+COPY components/gatekeeper/pyproject.toml /opt/qdrant/components/gatekeeper/pyproject.toml
+
+COPY devops/scripts/start_service.sh /opt/qdrant/components/start_service.sh
+
+COPY charts /opt/qdrant/charts
+
+
+RUN apt-get -y update && \
+    apt-get -y install curl && \
+    pip install --upgrade pip && \
+    pip install poetry==${POETRY_VERSION} && \
+    curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl" && \
+    mv kubectl /bin/ && \
+    chmod +x /bin/kubectl && \
+    cd /tmp/ && \
+    curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 && \
+    chmod 700 get_helm.sh && \
+    ./get_helm.sh && \
+    rm -f /opt/components/qdrant/nexus/poetry.lock && \
+    cd /opt/qdrant/components/orion/ && \
+    poetry config virtualenvs.create false && \
+    poetry install -v --only main --no-interaction --no-ansi && \
+    cd /opt/qdrant/components/nebula/ && \
+    poetry install -v --only main --no-interaction --no-ansi && \
+    cd /opt/qdrant/components/gatekeeper/ && \
+    poetry install -v --only main --no-interaction --no-ansi && \
+    pip install pip-autoremove && \
+    pip-autoremove poetry -y && \
+    pip uninstall pip-autoremove -y && \
+    adduser --disabled-password --gecos "" qdrant && \
+    chown -R qdrant:qdrant /opt/qdrant && \
+    apt auto-remove -y && \
+    apt-get clean -y && \
+    rm -rf /var/cache/apt/archives /var/lib/apt/lists/* && \
+    rm -rf /tmp/*
+
+USER qdrant
+

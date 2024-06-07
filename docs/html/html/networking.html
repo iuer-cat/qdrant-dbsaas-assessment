@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Networking &mdash; Qdrant DBaaS prototype  documentation</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/sphinx_highlight.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="prev" title="Use Cases" href="use_cases.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            Qdrant DBaaS prototype
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="scope.html">Scope</a></li>
+<li class="toctree-l1"><a class="reference internal" href="architecture.html">Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="use_cases.html">Use Cases</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Networking</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">Qdrant DBaaS prototype</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Networking</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/networking.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="networking">
+<h1>Networking<a class="headerlink" href="#networking" title="Permalink to this heading"></a></h1>
+<p>Currently, it seems that Qdrant Cloud only offers public access to
+managed clusters. Recently, they launched a Hybrid Cloud product
+which, in my opinion, adopts a mixed on-prem deployment model. In
+this model, although the cluster remains within the client’s
+boundaries, it can be partially managed from Qdrant Cloud’s Control
+Plane.</p>
+<p>This use case is relevant for those implementations where, due to
+latency or regulation issues, the data cannot be hosted in the
+cloud. This practice is common in many professional solutions.</p>
+<p>However, there are more configuration options or network topologies
+that could be interesting and that Qdrant seems to lack so far.</p>
+<dl class="simple">
+<dt>1 - VPC Level Peerings</dt><dd><p>Major Cloud Providers have been offering VPC peerings for years.
+These are essentially cross-account network connections that
+allow communications to flow through private networks belonging
+to the same Cloud provider and not be exposed to the Internet.
+Some providers of solutions similar to Qdrant like Mongo or
+Elastic offer the creation of automated peerings, which
+increases the security of the data and reduces its latency.
+This solution is ideal for clients who have their workloads
+hosted in the cloud.</p>
+</dd>
+<dt>2 - Network Access Control</dt><dd><p>In both the case of services exposed to the internet and the
+case of services connected via peering, it is interesting to
+have network-based access control systems. This essentially
+means application firewalls that filter or grant access based on
+the IP or CIDR of a client. Just like in the case of Peerings,
+some providers like Mongo Cloud provide this service, which
+helps to improve security and control access to information.</p>
+</dd>
+<dt>3 - Private Links</dt><dd><p>This arrangement is a bit more complex and is served by major
+Cloud Providers. It consists of creating a private network
+channel between the Qdrant cluster and an external location
+outside the cloud where the client has their applications.
+Basically, it connects on-premise networks to the Qdrant cloud,
+unlike a VPN where traffic travels encrypted over the internet.
+In Private Links or Direct Connects, communication goes through
+dedicated channels of low latency and high bandwidth. These are
+complex solutions, where the client wants the cluster to remain
+managed but the flow of their data to be private and low latency.</p>
+</dd>
+</dl>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="use_cases.html" class="btn btn-neutral float-left" title="Use Cases" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright Albert Monfa.</p>
+  </div>
+
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

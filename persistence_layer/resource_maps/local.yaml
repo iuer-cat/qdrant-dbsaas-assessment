@@ -1,0 +1,13 @@
+# Assuming the resource_maps yaml files are created by the component
+# Draftsman for this prototype,
+
+id: 5326f769-e9cf-4a65-92a9-9569311a5dfb
+cloud_provider:
+  id: 699a18a1-5a75-45b3-beb1-0a150b6e95cd
+  name: minikube
+  account_id: "amonfa_local"
+  available_regions: ["local"]
+clusters:
+  - id: 12a607bb-1751-4a85-83c9-3f1911cef4e7
+    region: 'local'
+    engine: 'minikube'

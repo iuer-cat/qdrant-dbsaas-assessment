@@ -1,0 +1,7 @@
+account_id: 988ed5bd-b52f-4b03-a528-c774410e036d
+cloud_provider: minikube
+cloud_provider_region: local
+cloud_provider_service_endpoint: 7455ba01-fc9a-5cb0-9d7d-956c81dab0ce.local.minikube.localhost
+db_cluster_api_key: UXrrUEt0npbZeACGIyyPCqPgvUnLCEvt
+db_cluster_endpoint: 10.101.142.28
+db_cluster_id: 12a607bb-1751-4a85-83c9-3f1911cef4e7

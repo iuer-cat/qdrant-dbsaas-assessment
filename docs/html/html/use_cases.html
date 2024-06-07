@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Use Cases &mdash; Qdrant DBaaS prototype  documentation</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/sphinx_highlight.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Networking" href="networking.html" />
+    <link rel="prev" title="Architecture" href="architecture.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            Qdrant DBaaS prototype
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="scope.html">Scope</a></li>
+<li class="toctree-l1"><a class="reference internal" href="architecture.html">Architecture</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Use Cases</a></li>
+<li class="toctree-l1"><a class="reference internal" href="networking.html">Networking</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">Qdrant DBaaS prototype</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Use Cases</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/use_cases.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="use-cases">
+<h1>Use Cases<a class="headerlink" href="#use-cases" title="Permalink to this heading"></a></h1>
+<section id="provision-new-qdrant-db-cluster">
+<h2>Provision New Qdrant DB Cluster<a class="headerlink" href="#provision-new-qdrant-db-cluster" title="Permalink to this heading"></a></h2>
+<aside class="sidebar">
+<p class="sidebar-title">User Story</p>
+<p><em>As a Client of the Enterprise *Qdrant</em> DB Cloud, I must be able to provision
+clusters specifying the number of nodes in the cluster and the computational
+resources of memory, disk, and CPU, all via API.*</p>
+</aside>
+<p>This use case is fundamental in the user-story prototype. To successfully
+address it, it is crucial to consider the challenges and key points that it
+presents.</p>
+<section id="identified-pitfalls">
+<h3>Identified Pitfalls<a class="headerlink" href="#identified-pitfalls" title="Permalink to this heading"></a></h3>
+<dl class="simple">
+<dt>1 - Long Runs</dt><dd><p>Provisioning infrastructure is costly and slow in terms of computation, as
+observed in the public clouds of AWS and other providers. This complexity is
+evident in the proliferation of IaaC tools, such as Terraform or Pulumi.</p>
+</dd>
+<dt>2 - Cloud Diversity</dt><dd><p>Each cloud provider has different APIs for infrastructure provisioning.
+Although tools like Terraform seek to homogenize the process, each provider has
+specific implementation details.</p>
+</dd>
+<dt>3 - User Experience</dt><dd><p>Provisioning resources On-Demand can affect the user experience in <em>Qdrant</em>
+Cloud. If the provisions are slow, the experience deteriorates. On the other
+hand, having computational resources in reserve increases TCO costs.</p>
+</dd>
+</dl>
+</section>
+<section id="strategies-for-risk-minimization">
+<h3>Strategies for Risk Minimization<a class="headerlink" href="#strategies-for-risk-minimization" title="Permalink to this heading"></a></h3>
+<p>After identifying the critical points of the use case, we seek solutions that
+minimize or eliminate frictions to increase the project’s chances of success.</p>
+<p>To reduce the heterogeneity in infrastructure provisioning, we opted to use
+Kubernetes, a higher-level abstraction layer that allows us to improve
+utilization and increase installation density per instance, thus reducing the
+total cost of the product.</p>
+<p>To minimize the waiting time from the start of provisioning a Kubernetes cluster
+until its availability, we have made key architectural decisions. One of them is
+to use managed Kubernetes clusters from cloud providers, taking advantage of
+their serverless capabilities. This decision involves trade-offs, such as less
+control over the underlying infrastructure, but it is the most pragmatic for a
+prototype.</p>
+<p>Additionally, we have turned this use case into an asynchronous process,
+where the client sends a request for a new cluster that is validated and processed
+in the background. This approach facilitates the scalability of our application
+with an acceptable increase in development complexity, following a
+common design pattern.</p>
+</section>
+<section id="orion-implementation-details">
+<h3>Orion Implementation Details<a class="headerlink" href="#orion-implementation-details" title="Permalink to this heading"></a></h3>
+<p>Based on the previously described, we will review the activity diagrams that
+represent the use cases and will discuss the most notable points for the
+<em>Orion</em> component.</p>
+<p>It is important to remember that <em>Orion</em> is a service responsible for exposing a
+public REST API and processing client requests. The response time to these
+requests is, therefore, a crucial factor to consider.</p>
+<a class="reference internal image-reference" href="_images/use_case_new_db_cluster_orion.svg"><img alt="Provision New Qdrant DB Cluster (Orion Activity)" class="align-center" height="737" src="_images/use_case_new_db_cluster_orion.svg" width="618" /></a>
+<p>One of the most highlighted elements in the diagram is the “ResourceClaim” and
+the “ResourceAllocation”. The “Claim” is a model or request that needs to be
+satisfied and includes the chosen cloud provider, the region, the number of
+nodes in the <em>Qdrant</em> cluster, as well as its associated computational resources.</p>
+<p>However, this API does not guarantee that all requests can be fulfilled due to
+a possible lack of computational resources associated with a specific cloud
+provider and region.</p>
+<p>For this reason, requests might be rejected due to a lack of resources
+available for a specific claim. A strategy for managing such eventualities is
+to accept the claims even when they cannot be immediately satisfied, assuming
+that more computational resources will eventually be added and the request
+can be fulfilled (202 HTTP Accepted).</p>
+<p>The “Resource Allocation”, on the other hand, is the confirmation that the
+total of claimed resources will eventually be satisfied in the background. This
+is where the Command Bus, as an inter-service communication piece, becomes
+more important, as it allows us to decouple from the provisioning of workloads,
+delay them in case of problems, or even retry them if they fail.</p>
+</section>
+<section id="implementation-details-of-nebula">
+<h3>Implementation Details of Nebula<a class="headerlink" href="#implementation-details-of-nebula" title="Permalink to this heading"></a></h3>
+<p><em>Nebula</em> is responsible for materializing the provisioning of new clusters.
+For this purpose, it receives a command of the type <code class="docutils literal notranslate"><span class="pre">ProvisionDBCluster</span></code>.</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">account_id</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">988ed5bd-b52f-4b03-a528-c774410e036d</span>
+<span class="nt">cloud_provider</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">minikube</span>
+<span class="nt">cloud_region</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">local</span>
+<span class="nt">cluster_id</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">12a607bb-1751-4a85-83c9-3f1911cef4e7</span>
+<span class="nt">cluster_name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">cloud-test</span>
+<span class="nt">cluster_version</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1.9.4</span>
+<span class="nt">created_at</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;2024-06-05</span><span class="nv"> </span><span class="s">21:54:03.953640&#39;</span>
+<span class="nt">db_configuration</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">cluster_endpoint</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">7455ba01-fc9a-5cb0-9d7d-956c81dab0ce.local.minikube.localhost</span>
+<span class="w">  </span><span class="nt">cluster_id</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">12a607bb-1751-4a85-83c9-3f1911cef4e7</span>
+<span class="w">  </span><span class="nt">created_at</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2024-06-05 19:54:03.953619</span>
+<span class="w">  </span><span class="nt">id</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">3f344bab-2c8f-5be7-a62d-d64fcc4c62b4</span>
+<span class="w">  </span><span class="nt">node_configuration</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">cpu</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">100</span>
+<span class="w">    </span><span class="nt">disk</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
+<span class="w">    </span><span class="nt">memory</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">128</span>
+<span class="w">  </span><span class="nt">num_nodes</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">3</span>
+<span class="nt">id</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">688c14fe-9b83-5887-ba6c-f4fa310adc63</span>
+<span class="nt">metadata</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">{}</span>
+<span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ProvisionDBCluster</span>
+<span class="nt">schema_id</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">701</span>
+<span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">COMMAND</span>
+</pre></div>
+</div>
+<p>It is important to mention that commands are non-repudiable, that is, once
+issued, they represent a call to action that will be executed sooner or later.
+No business logic should be able to discard a command, as this would
+significantly affect the integrity of our data.</p>
+<a class="reference internal image-reference" href="_images/use_case_new_db_cluster_nebula.svg"><img alt="Provision New Qdrant DB Cluster (Nebula Activity)" class="align-center" height="877" src="_images/use_case_new_db_cluster_nebula.svg" width="934" /></a>
+<p>Once the command is received by <em>Nebula</em>, a 32-character
+<a class="reference external" href="https://qdrant.tech/documentation/guides/security/">api-key</a> will be
+generated that will act as a secret. This api-key will not be shared with the
+user and will serve as the seed for generating other api-keys in subsequent
+use cases.</p>
+<p>With the information from the command, we will create a <code class="docutils literal notranslate"><span class="pre">DBClusterSpecs</span></code> model
+that contains the necessary details for an <code class="docutils literal notranslate"><span class="pre">InfrastructureClient</span></code> to carry out
+the installation.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">InfrastructureClient</span></code> is a key concept; its implementation is based on
+an abstract class interface. Its purpose is to act as a CONTRACT that all
+implementations must follow. These implementations have the sole responsibility
+of turning the specifications of a <em>Qdrant</em> DB Cluster into a functional
+installation. We could have different implementations, such as defining a
+Custom Resource Definition in Kubernetes, using a Kubernetes client, or
+installing via Helm using a Chart.</p>
+<p>In this prototype, we have opted to install <em>Qdrant</em> using its official Chart.
+Although it is not the most reliable and maintainable method, it is suitable in
+the context of a prototype.</p>
+<p>Should the prototype evolve, we could always develop a new implementation that
+extends from <code class="docutils literal notranslate"><span class="pre">InfrastructureClient</span></code>, without requiring additional code changes
+(low coupling).</p>
+<p>Once the cluster has been provisioned, it is crucial to persist its details,
+such as the network configuration and the generated api-key.</p>
+<p>At this moment, the cluster would not yet be accessible to the client, either
+because the client does not know the secret provisioning api-key or because
+the Kubernetes infrastructure supporting the cluster is not exposed to the
+internet. The following use cases will define how the user can fully experience
+the provisioning and use of the cluster.</p>
+</section>
+</section>
+<section id="generate-api-key">
+<h2>Generate API-key<a class="headerlink" href="#generate-api-key" title="Permalink to this heading"></a></h2>
+<aside class="sidebar">
+<p class="sidebar-title">User Story</p>
+<p><em>Given a fully provisioned *Qdrant</em> DB Cluster.
+As a Client with the Administrator role of the Enterprise <em>Qdrant</em> DB Cloud,
+I must be able to generate API keys to securely access the cluster.*</p>
+</aside>
+<p>During the provisioning of <em>Qdrant</em>, the API key is internally generated and
+not shared with the client. <em>Qdrant</em> open source
+<a class="reference external" href="https://qdrant.tech/documentation/guides/security/">exposes</a> different
+ways to secure an installation, but all rely on the API key or the use of it as
+a secret to sign other types of tokens, such as JWTs.</p>
+<p>Based on this and after examining the current implementation of API-KEY
+generation in <em>Qdrant</em>’s cloud, we have decided to adopt the following
+approach:</p>
+<blockquote>
+<div><p><em>Using the internal and private API key generated during the
+provisioning of the cluster, we will generate new keys using
+a salt hashing strategy.</em></p>
+</div></blockquote>
+<p>This method allows us to create an arbitrary number of API keys that will be
+associated with a specific <em>Qdrant</em> cluster, unlike in the <em>Qdrant</em> Cloud where the
+same API key can be used across different clusters.</p>
+<p>Normally, token generation and everything related to AuthZ/AuthN is managed by
+an IDP, or through implementations like OAUTH2 or similar. However, as we are
+working on a prototype and the generation of keys with salt hashing is
+relatively simple, we have opted for this in-house solution instead of depending
+on external IDPs or similar.</p>
+<a class="reference internal image-reference" href="_images/use_case_new_api_key.svg"><img alt="Create API Key" class="align-center" height="898" src="_images/use_case_new_api_key.svg" width="711" /></a>
+<p>This use case allows for the instant generation of API keys, but involves some
+significant problems and considerations:</p>
+<dl class="simple">
+<dt>1 - Regulation:</dt><dd><p>Storing secrets and derived keys could be sensitive in environments
+with SOC2 certification or stricter.</p>
+</dd>
+<dt>2 - Security:</dt><dd><p>The type of key generated is not revocable and does not have an
+expiration time, which means once generated, it becomes a
+<em>Golden Ticket</em>.</p>
+</dd>
+</dl>
+</section>
+<section id="connecting-to-the-qdrant-cluster-through-gatekeeper">
+<h2>Connecting to the Qdrant Cluster Through GateKeeper<a class="headerlink" href="#connecting-to-the-qdrant-cluster-through-gatekeeper" title="Permalink to this heading"></a></h2>
+<aside class="sidebar">
+<p class="sidebar-title">User Story</p>
+<p><em>Given a fully provisioned *Qdrant</em> DB Cluster, as a client,
+I should have a dedicated and secured endpoint to access the
+cluster via the <em>Qdrant</em> API.*</p>
+</aside>
+<p>This use case integrates previous elements to provide an end-to-end (E2E)
+experience, allowing the client, after provisioning a cluster and generating an
+api-key, to access it via the specific endpoint created during the provisioning
+process.</p>
+<p>These endpoints are actually DNS records similar to:</p>
+<blockquote>
+<div><p><code class="docutils literal notranslate"><span class="pre">7455ba01-fc9a-5cb0-9d7d-956c81dab0ce.local.minikube.localhost</span></code></p>
+</div></blockquote>
+<p>The structure of these endpoints follows the model of the endpoints generated by
+<em>Qdrant</em>’s Private Cloud, and consist of the following sections:</p>
+<blockquote>
+<div><p><code class="docutils literal notranslate"><span class="pre">&lt;QDRANT_CLUSTER_UUID&gt;.&lt;CLOUD_REGION&gt;.&lt;CLOUD_PROVIDER&gt;.&lt;TLD&gt;</span></code></p>
+</div></blockquote>
+<p>Thus, the endpoints are predictable and dedicated per cluster. However, in this
+implementation, we have not considered two essential points that any Reverse-Proxy
+or HTTP Endpoint should provide:</p>
+<dl class="simple">
+<dt>1 - A/AAAA DNS Record</dt><dd><p>Essentially, a DNS record should be added in the DNS zone that matches the
+endpoint, and consequently making it resolvable via DNS.</p>
+</dd>
+<dt>2 - SSL Certificates</dt><dd><p>Generation of certificates of the type <code class="docutils literal notranslate"><span class="pre">*.&lt;CLOUD_REGION&gt;.&lt;CLOUD_PROVIDER&gt;.&lt;TLD&gt;</span></code>
+as SubjectAltName to ensure end-to-end encrypted communication.</p>
+</dd>
+</dl>
+<p>These would be minimal features that the endpoints should support in a
+production environment.</p>
+<p>Although there are solutions like <em>API-Gateways</em> that offer these features or
+similar ones like SSL enforcement or URL tokenization out-of-the-box, we have
+chosen not to include more infrastructure components for this prototype, creating
+a small Reverse Proxy based on <em>Twisted</em>, as a <strong>technical exercise</strong> to
+understand how these products work internally.</p>
+<a class="reference internal image-reference" href="_images/use_case_gate_keeper_connection.svg"><img alt="Create API Key" class="align-center" height="1398" src="_images/use_case_gate_keeper_connection.svg" width="609" /></a>
+<p>The above diagram shows the entire flow of activity of the Reverse Proxy called
+<em>GateKeeper</em>, how a request is evaluated and how it is proxied to the final
+destination.</p>
+<p>It is important to mention that the URLs or domain names that accompany the web
+are expressed in the form of HTTP headers; in this case, the domain is specified
+by the <code class="docutils literal notranslate"><span class="pre">Host</span></code> header.</p>
+<p>Additionally, <em>Qdrant</em> specifies two more headers for authentication: one is
+<code class="docutils literal notranslate"><span class="pre">api-key</span></code> and the other is <code class="docutils literal notranslate"><span class="pre">Bearer</span></code> in case of using JWTs signed with the
+api-key.</p>
+<p>This implementation basically rejects any request that does not include these
+two headers. If the request contains them, <em>GateKeeper</em> will verify the Host
+received with its internal database to determine where to proxy the request.</p>
+<p>Regarding the api-key, <em>GateKeeper</em> will use the ‘secret’ (the key with which the
+<em>Qdrant</em> DB Cluster was provisioned) to verify that it is a derived key.</p>
+<p>If both the Host header is recognizable and the api-key is legitimate, <em>GateKeeper</em>
+will proceed to proxy the request to its final destination and return the
+response to the user.</p>
+<section id="interesting-considerations-of-this-approach">
+<h3>Interesting Considerations of this Approach<a class="headerlink" href="#interesting-considerations-of-this-approach" title="Permalink to this heading"></a></h3>
+<dl class="simple">
+<dt>1 - Scalability</dt><dd><p>Since routing is done at the DNS level, we can position different
+deployments of <em>GateKeeper</em> segmented by region or cloud provider,
+close to the <em>Qdrant</em> servers to reduce latencies.</p>
+</dd>
+<dt>2 - Security</dt><dd><p>The Reverse Proxy allows all <em>Qdrant</em> Cluster provisions to be made over
+private networks without internet connection, thus increasing security
+through network segmentation and leaving the Reverse Proxy
+(or an API-Gateway in a more real environment) as the only point of entry
+to the product.</p>
+</dd>
+<dt>3 - Authorization</dt><dd><p>The Reverse Proxy allows the use of a wider variety of security mechanisms
+transparently, such as OAuth2, two-factor authentication, etc., without
+requiring changes to <em>Qdrant</em>’s product implementation.</p>
+</dd>
+<dt>4 - Observability/Limits</dt><dd><p>Using a Reverse Proxy as a central point allows us to establish
+usage quotas or rate limits, as well as implement usage-based monetization
+if necessary, without the internal product or service having to change for
+it.</p>
+</dd>
+</dl>
+<p>The use of reverse proxy or layer 4 and 7 routers is a well-established network
+architecture. In Kubernetes, we have very high-quality options like Istio,
+Kuadrant, or OPA, which offer many of the features and features described here,
+production-ready and out-of-the-box.</p>
+</section>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="architecture.html" class="btn btn-neutral float-left" title="Architecture" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="networking.html" class="btn btn-neutral float-right" title="Networking" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright Albert Monfa.</p>
+  </div>
+
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

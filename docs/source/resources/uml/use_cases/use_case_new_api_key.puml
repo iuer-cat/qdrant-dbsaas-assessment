@@ -1,0 +1,73 @@
+@startuml
+
+|Orion|
+start
+partition FastAPI {
+:Request
+"""/{account_id}/auth/api-keys"";
+}
+:CreateApiKeyBodyRequest; <<input>>
+note left
+    The Api-Key is generated
+    per Qdrant DB Cluster, 1
+    api-key grant access to one
+    cluster.
+  end note
+
+partition DBaaSApiKeyService {
+:create_api_key(); <<task>>
+}
+
+:db_cluster_id; <<output>>
+note left
+    Using the Qdrant Cluster ID
+    generated during the
+    provisioning.
+end note
+
+partition DBClusterRepository {
+:get_by_id(db_cluster_id); <<procedure>>
+note left
+    Retrieve the information
+    for the given Qdrant DB
+    Cluster.
+end note
+}
+
+:DBCluster; <<output>>
+note left
+""account_id: str""
+""db_cluster_id: str""
+""**db_cluster_api_key: str**""
+""db_cluster_endpoint: str""
+""cloud_provider: str""
+""cloud_provider_region: str""
+""cloud_provider_service_endpoint: str""
+end note
+
+partition DBaaSApiKeyService {
+:_generate_salt_hashing_api_key(); <<task>>
+note left
+    Using the Qdrant api-key
+    configured during the
+    deployment as secret for
+    the new derivative api-key.
+end note
+}
+
+:CreateAPiKeyResponse; <<output>>
+note left
+""id: str""
+""account_id: str""
+""created_at: datetime""
+""db_cluster_id: str""
+""**api_key: str**""
+end note
+note right
+    Generate the response and
+    do not persist the API-key.
+end note
+
+stop
+
+@enduml

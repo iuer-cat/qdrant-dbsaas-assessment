@@ -1,0 +1,101 @@
+@startuml
+skinparam componentStyle rectangle
+
+actor actor_api [
+]
+note left
+ Represents an end-user
+ or application that want to Manage
+ Qdrant Clusters or API-keys
+end note
+
+actor actor_db_cluster [
+]
+note left
+ Represents an end-user or application
+ that want to conenct the Qdrant DB Cluster
+end note
+
+component api [
+Control Plane API (Orion)
+]
+
+component gatekeeper [
+Gatekeeper
+(Reverse Proxy)
+]
+
+component command_bus [
+Command Bus
+]
+
+queue c_queue [
+Commands Queue
+]
+
+component use_case [
+Use Case
+]
+
+component use_case_cluster [
+Provision New
+Cluster
+]
+
+component use_case_api_key [
+Create API Key
+]
+
+component nebula [
+Asynchronous Executor
+(Nebula)
+]
+
+component helm [
+Helm Chart
+]
+
+package "Kubernetes Cluster\n CloudProvider (Unspecified)" {
+    component QdrantStatefulSet [
+    Qdrant StatefulSet
+    ]
+
+    component LoadBalancerService [
+    LoadBalancer Service
+    ]
+
+}
+
+component endpoint [
+Qdrant DB
+Endpoint
+]
+
+component salt_key [
+SaltHashing Api Key
+]
+
+component twisted [
+Twisted
+Framework
+]
+
+actor_api --> api : HTTP Request
+actor_db_cluster --> gatekeeper : HTTP Request
+api --> use_case : Execute
+use_case --> use_case_cluster : Async
+use_case_cluster --> command_bus : Dispatch
+command_bus --> c_queue : Publish
+command_bus <-- c_queue : Subscribe
+use_case --> use_case_api_key : Sync
+nebula <-- command_bus : Retrieve
+nebula --> helm : compose
+helm --> QdrantStatefulSet : Provision
+helm --> LoadBalancerService : Provision
+gatekeeper --> twisted : Get Host \nHeader
+gatekeeper --> twisted : Get api-key \nHeader
+gatekeeper --> endpoint : Matches
+gatekeeper --> salt_key : Verify
+gatekeeper --> LoadBalancerService : Proxy pass
+
+@enduml

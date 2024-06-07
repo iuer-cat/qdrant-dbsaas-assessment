@@ -1,0 +1,12 @@
+.env
+.idea
+__pycache__
+venv
+*.pem
+*.pyc
+.pytest_cache
+**/.DS_Store
+*.swp
+.python-version
+.terraform
+*.hcl
